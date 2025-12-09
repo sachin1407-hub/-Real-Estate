@@ -1,0 +1,168 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Dream Home Realty</title> 
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+rel="stylesheet"> 
+    <style> .modal { transition: opacity 0.25s ease; } </style> 
+</head> 
+<body class="bg-gray-50 text-gray-800 font-sans"> 
+ 
+    <nav class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-10"> 
+        <div class="container mx-auto flex justify-between items-center"> 
+            <h1 class="text-2xl font-bold"><i class="fas fa-home mr-2"></i>DreamHome</h1> 
+            <button class="bg-blue-700 px-4 py-2 rounded hover:bg-blue-600">List Your Property</button> 
+        </div> 
+    </nav> 
+ 
+    
+    <main class="container mx-auto p-6">  
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8"> 
+            <h2 class="text-xl font-semibold mb-4">Find your perfect home</h2> 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> 
+                <input type="text" id="searchInput" placeholder="Search location or title..." class="border p-3 
+rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"> 
+                <select id="priceFilter" class="border p-3 rounded w-full focus:outline-none focus:ring-2 
+focus:ring-blue-500"> 
+                    <option value="10000000rs">Any Price</option> 
+                    <option value="300000">300,000rs max</option> 
+                    <option value="600000">600,000rs max</option> 
+                    <option value="900000">900,000rs max</option> 
+                </select> 
+                <button onclick="filterProperties()" class="bg-green-600 text-white p-3 rounded hover:bg-green
+700 transition">Search Properties</button> 
+            </div> 
+        </div> 
+        <div id="listings" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"> 
+        </div> 
+        <p id="noResults" class="hidden text-center text-gray-500 text-xl mt-10">No properties found 
+matching your criteria.</p> 
+    </main> 
+  
+    <div id="inquiryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify
+center z-50 opacity-0 pointer-events-none modal"> 
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl transform scale-95 transition
+transform duration-200"> 
+            <div class="flex justify-between items-center mb-6"> 
+                <h3 class="text-2xl font-bold text-gray-800">Inquire About Property</h3> 
+                <button onclick="toggleModal(false)" class="text-gray-500 hover:text-red-500"><i class="fas fa
+times fa-lg"></i></button> 
+            </div> 
+            <p id="modalPropertyTitle" class="text-blue-600 font-semibold mb-4"></p> 
+            <form onsubmit="handleInquiry(event)" class="space-y-4"> 
+                <input type="text" placeholder="Your Name" required class="w-full border p-3 rounded 
+focus:ring-2 focus:ring-blue-500 outline-none"> 
+                <input type="email" placeholder="Your Email" required class="w-full border p-3 rounded 
+focus:ring-2 focus:ring-blue-500 outline-none"> 
+                <textarea placeholder="Message..." rows="3" class="w-full border p-3 rounded focus:ring-2 
+focus:ring-blue-500 outline-none"></textarea> 
+                <button type="submit" class="w-full bg-blue-900 text-white py-3 rounded font-bold hover:bg
+blue-800 transition">Send Inquiry</button> 
+            </form> 
+        </div> 
+    </div> 
+ 
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded shadow-lg 
+transform translate-y-20 transition-transform duration-300"> 
+        Inquiry sent successfully! 
+    </div> 
+ 
+    <script>  
+        const properties = [ 
+            { id: 1, title: "Modern DowntowLoftn ", price: 450000, loc: "Downtown, Seattle", beds: 2, baths: 2, 
+img: "https://a0.muscache.com/im/pictures/757f35bb-0351-4152-b7d5-bb0eaca4743b.jpg?auto=format&fit=crop&w=600&q=80" }, 
+            { id: 2, title: "Suburban Family Home", price: 650000, loc: "Bellevue, WA", beds: 4, baths: 3, img: 
+"https://www.idesignarch.com/wp-content/uploads/French-Inspired-House-Design-University-Park_1.jpg?auto=format&fit=crop&w=600&q=80" }, 
+            { id: 3, title: "Cozy Cottage", price: 295000, loc: "Portland, OR", beds: 2, baths: 1, img: 
+"https://images.trvl-media.com/lodging/30000000/29140000/29135100/29135051/ddd084d5.jpg?auto=format&fit=crop&w=600&q=80" }, 
+            { id: 4, title: "Luxury Ocean Villa", price: 1200000, loc: "Malibu, CA", beds: 5, baths: 4, img: 
+"https://static.vecteezy.com/system/resources/previews/054/644/225/large_2x/modern-luxury-villa-overlooking-tranquil-ocean-in-tropical-paradise-photo.jpg?auto=format&fit=crop&w=600&q=80" }, 
+            { id: 5, title: "Mountain Retreat", price: 550000, loc: "Denver, CO", beds: 3, baths: 2, img: 
+"https://www.guptasen.com/wp-content/uploads/2025/08/mountain-retreat-karjat-4-BHK-villa-set-amidts-rolling-hills-misty-forest.webp?auto=format&fit=crop&w=600&q=80" }, 
+            { id: 6, title: "Urban Studio", price: 250000, loc: "Austin, TX", beds: 1, baths: 1, img: 
+"https://urban-studio.co.za/wp-content/uploads/2022/05/design.png?auto=format&fit=crop&w=600&q=80" } 
+        ]; 
+  
+        const container = document.getElementById('listings'); 
+         
+        function render(items) { 
+            container.innerHTML = items.map(p => ` 
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition duration
+300"> 
+                    <img src="${p.img}" alt="${p.title}" class="w-full h-48 object-cover"> 
+                    <div class="p-5"> 
+                        <div class="flex justify-between items-start"> 
+                            <h3 class="text-xl font-bold mb-2">${p.title}</h3> 
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 
+rounded">$${p.price.toLocaleString()}</span> 
+                        </div> 
+                        <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2"></i>${p.loc}</p> 
+                        <div class="flex items-center text-gray-500 text-sm mb-4"> 
+                            <span class="mr-4"><i class="fas fa-bed mr-1"></i>${p.beds} Beds</span> 
+                            <span><i class="fas fa-bath mr-1"></i>${p.baths} Baths</span> 
+                        </div> 
+                        <button onclick="openInquiry('${p.title}')" class="w-full bg-blue-900 text-white py-2 rounded 
+hover:bg-blue-800 transition">Contact Agent</button> 
+                    </div> 
+                </div> 
+            `).join(''); 
+             
+            document.getElementById('noResults').classList.toggle('hidden', items.length > 0); 
+        } 
+  
+        function filterProperties() { 
+            const query = document.getElementById('searchInput').value.toLowerCase(); 
+            const maxPrice = Number(document.getElementById('priceFilter').value); 
+             
+            const filtered = properties.filter(p =>  
+                (p.title.toLowerCase().includes(query) || p.loc.toLowerCase().includes(query)) && 
+                p.price <= maxPrice 
+            ); 
+            render(filtered); 
+        } 
+ 
+        document.getElementById('searchInput').addEventListener('keyup', filterProperties); 
+        document.getElementById('priceFilter').addEventListener('change', filterProperties); 
+ 
+        // Modal Logic 
+        const modal = document.getElementById('inquiryModal'); 
+        const modalContent = modal.querySelector('div'); 
+ 
+        function toggleModal(show) { 
+            if(show) { 
+                modal.classList.remove('hidden'); 
+                setTimeout(() => { // slight delay for animation 
+                    modal.classList.remove('opacity-0', 'pointer-events-none'); 
+                    modalContent.classList.remove('scale-95'); 
+                    modalContent.classList.add('scale-100'); 
+                }, 10); 
+            } else { 
+                modal.classList.add('opacity-0', 'pointer-events-none'); 
+                modalContent.classList.remove('scale-100'); 
+                modalContent.classList.add('scale-95'); 
+                setTimeout(() => modal.classList.add('hidden'), 250); 
+            } 
+        } 
+ 
+        function openInquiry(title) { 
+            document.getElementById('modalPropertyTitle').innerText = `Inquiry for: ${title}`; 
+            toggleModal(true); 
+        } 
+ 
+        function handleInquiry(e) { 
+            e.preventDefault(); 
+            toggleModal(false); 
+            e.target.reset(); 
+            const toast = document.getElementById('toast'); 
+            toast.classList.remove('translate-y-20'); 
+            setTimeout(() => toast.classList.add('translate-y-20'), 3000); 
+        } 
+ 
+        // Initial Render 
+        render(properties); 
+    </script> 
+</body> 
+</html>
