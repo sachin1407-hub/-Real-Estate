@@ -72,7 +72,7 @@ transform translate-y-20 transition-transform duration-300">
  
     <script>  
         const properties = [ 
-            { id: 1, title: "Modern DowntowLoftn ", price: 450000, loc: "Downtown, Seattle", beds: 2, baths: 2, 
+            { id: 1, title: "Modern Downtow Loftn ", price: 450000, loc: "Downtown, Seattle", beds: 2, baths: 2, 
 img: "https://a0.muscache.com/im/pictures/757f35bb-0351-4152-b7d5-bb0eaca4743b.jpg?auto=format&fit=crop&w=600&q=80" }, 
             { id: 2, title: "Suburban Family Home", price: 650000, loc: "Bellevue, WA", beds: 4, baths: 3, img: 
 "https://www.idesignarch.com/wp-content/uploads/French-Inspired-House-Design-University-Park_1.jpg?auto=format&fit=crop&w=600&q=80" }, 
@@ -97,7 +97,7 @@ img: "https://a0.muscache.com/im/pictures/757f35bb-0351-4152-b7d5-bb0eaca4743b.j
                         <div class="flex justify-between items-start"> 
                             <h3 class="text-xl font-bold mb-2">${p.title}</h3> 
                             <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 
-rounded">$${p.price.toLocaleString()}</span> 
+rounded">Rs${p.price.toLocaleString()}</span> 
                         </div> 
                         <p class="text-gray-600 mb-4"><i class="fas fa-map-marker-alt mr-2"></i>${p.loc}</p> 
                         <div class="flex items-center text-gray-500 text-sm mb-4"> 
@@ -165,4 +165,5 @@ hover:bg-blue-800 transition">Contact Agent</button>
         render(properties); 
     </script> 
 </body> 
+
 </html>
